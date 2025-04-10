@@ -3,10 +3,10 @@ import { StyleSheet, Platform, TouchableOpacity } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { TabSwitcher } from '@/components/navigation/TabSwitcher';
 import { TotalFooter } from '@/components/footer/TotalFooter';
 import { AddTransactionModal } from '@/components/modals/AddTransactionModal';
 import { EditTransactionModal } from '@/components/modals/EditTransactionModal';
+import { MonthSelector } from '@/components/datePickers/MonthSelector';
 
 type Transaction = {
   id: string;
@@ -16,18 +16,33 @@ type Transaction = {
 };
 
 export default function IncomeScreen() {
-  const [activeTab, setActiveTab] = useState('current');
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
+  // Thêm hàm helper để kiểm tra xem transaction có thuộc tháng được chọn không
+  const isSameMonth = (date1: Date, date2: Date) => {
+    return date1.getMonth() === date2.getMonth() && 
+           date1.getFullYear() === date2.getFullYear();
+  };
+
+  // Lọc transactions theo tháng được chọn
+  const filteredTransactions = transactions.filter(transaction => 
+    isSameMonth(transaction.date, selectedDate)
+  );
+
+  // Tính tổng amount từ transactions đã được lọc
+  const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+
   const handleAddIncome = (name: string, amount: number) => {
+    const firstDayOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
     const newTransaction: Transaction = {
       id: Date.now().toString(),
       name,
       amount,
-      date: new Date(),
+      date: firstDayOfMonth, // Luôn set ngày là ngày đầu tiên của tháng
     };
     setTransactions([newTransaction, ...transactions]);
   };
@@ -49,8 +64,6 @@ export default function IncomeScreen() {
     setIsEditModalVisible(true);
   };
 
-  const totalAmount = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
-
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('vi-VN');
   };
@@ -62,12 +75,15 @@ export default function IncomeScreen() {
         <ThemedText type="title">Thu nhập</ThemedText>
       </ThemedView>
 
-      <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
+      <MonthSelector 
+        selectedDate={selectedDate}
+        onDateSelect={setSelectedDate}
+      />
 
       {/* Main Content Area */}
       <ThemedView style={styles.content}>
-        {transactions.length > 0 ? (
-          transactions.map(transaction => (
+        {filteredTransactions.length > 0 ? (
+          filteredTransactions.map(transaction => (
             <TouchableOpacity
               key={transaction.id}
               style={styles.transactionItem}
@@ -75,9 +91,7 @@ export default function IncomeScreen() {
             >
               <ThemedView style={styles.transactionInfo}>
                 <ThemedText style={styles.transactionName}>{transaction.name}</ThemedText>
-                <ThemedText style={styles.transactionDate}>
-                  {formatDate(transaction.date)}
-                </ThemedText>
+                {/* Bỏ phần hiển thị ngày ở đây */}
               </ThemedView>
               <ThemedText style={styles.transactionAmount}>
                 {transaction.amount.toLocaleString()} đ
@@ -144,11 +158,7 @@ const styles = StyleSheet.create({
   },
   transactionName: {
     fontSize: 16,
-    marginBottom: 4,
-  },
-  transactionDate: {
-    fontSize: 12,
-    color: '#888',
+    // Bỏ marginBottom vì không còn hiển thị ngày
   },
   transactionAmount: {
     fontSize: 16,

@@ -3,10 +3,10 @@ import { StyleSheet, Platform, TouchableOpacity } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { TabSwitcher } from '@/components/navigation/TabSwitcher';
 import { TotalFooter } from '@/components/footer/TotalFooter';
 import { AddTransactionModal } from '@/components/modals/AddTransactionModal';
 import { EditTransactionModal } from '@/components/modals/EditTransactionModal';
+import { DateSelector } from '@/components/datePickers/DateSelector';
 
 type Transaction = {
   id: string;
@@ -16,7 +16,7 @@ type Transaction = {
 };
 
 export default function ExpenseScreen() {
-  const [activeTab, setActiveTab] = useState('current');
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -27,7 +27,7 @@ export default function ExpenseScreen() {
       id: Date.now().toString(),
       name,
       amount,
-      date: new Date(),
+      date: selectedDate, // Sử dụng ngày được chọn
     };
     setTransactions([newTransaction, ...transactions]);
   };
@@ -49,7 +49,12 @@ export default function ExpenseScreen() {
     setIsEditModalVisible(true);
   };
 
-  const totalAmount = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  // Lọc transactions theo ngày được chọn
+  const filteredTransactions = transactions.filter(transaction => 
+    transaction.date.toDateString() === selectedDate.toDateString()
+  );
+
+  const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('vi-VN');
@@ -57,24 +62,27 @@ export default function ExpenseScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {/* Header */}
       <ThemedView style={styles.header}>
         <ThemedText type="title">Chi tiêu</ThemedText>
       </ThemedView>
 
-      <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
+      <DateSelector 
+        selectedDate={selectedDate}
+        onDateSelect={setSelectedDate}
+      />
 
-      {/* Main Content Area */}
       <ThemedView style={styles.content}>
-        {transactions.length > 0 ? (
-          transactions.map(transaction => (
+        {filteredTransactions.length > 0 ? (
+          filteredTransactions.map(transaction => (
             <TouchableOpacity
               key={transaction.id}
               style={styles.transactionItem}
               onPress={() => handleTransactionPress(transaction)}
             >
               <ThemedView style={styles.transactionInfo}>
-                <ThemedText style={styles.transactionName}>{transaction.name}</ThemedText>
+                <ThemedText style={styles.transactionName}>
+                  {transaction.name}
+                </ThemedText>
                 <ThemedText style={styles.transactionDate}>
                   {formatDate(transaction.date)}
                 </ThemedText>
@@ -85,7 +93,9 @@ export default function ExpenseScreen() {
             </TouchableOpacity>
           ))
         ) : (
-          <ThemedText style={styles.placeholderText}>Chưa có khoản nào</ThemedText>
+          <ThemedText style={styles.placeholderText}>
+            Chưa có khoản chi tiêu nào
+          </ThemedText>
         )}
       </ThemedView>
 
@@ -121,7 +131,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 40,
   },
   header: {
     paddingHorizontal: 16,
@@ -134,10 +143,11 @@ const styles = StyleSheet.create({
   transactionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: '#e0e0e0',
   },
   transactionInfo: {
     flex: 1,
@@ -148,7 +158,7 @@ const styles = StyleSheet.create({
   },
   transactionDate: {
     fontSize: 12,
-    color: '#888',
+    color: '#666',
   },
   transactionAmount: {
     fontSize: 16,
@@ -157,6 +167,6 @@ const styles = StyleSheet.create({
   placeholderText: {
     textAlign: 'center',
     marginTop: 20,
-    color: '#757575',
+    color: '#666',
   },
 });

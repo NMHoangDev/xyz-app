@@ -19,7 +19,7 @@ export function TotalFooter({ totalAmount, label, onAddPress }: TotalFooterProps
     <ThemedView style={[styles.footer, { marginBottom: insets.bottom + 40 }]}>
       <ThemedView style={styles.container}>
         <ThemedText style={styles.totalText}>{`Tổng ${label} là : ${totalAmount}`}</ThemedText>
-        /* Button them */
+        { /* button them */ }
         <TouchableOpacity style={styles.addButton} onPress={onAddPress}>
           <IconSymbol name="plus" size={16} color="#FFFFFF" />
         </TouchableOpacity>
