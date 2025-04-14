@@ -7,12 +7,14 @@ type Transaction = {
   id: string;
   name: string;
   amount: number;
+  date: Date;
+  category: string;  // Thêm trường category
 };
 
 interface EditTransactionModalProps {
   isVisible: boolean;
   onClose: () => void;
-  onSubmit: (id: string, name: string, amount: number) => void;
+  onSubmit: (id: string, name: string, amount: number, category: string) => void;
   onDelete: (id: string) => void;
   transaction: Transaction | null;
   type: 'income' | 'expense';
@@ -70,7 +72,12 @@ export function EditTransactionModal({
 
   const handleSubmit = () => {
     if (transaction && name && amount) {
-      onSubmit(transaction.id, name, parseFloat(amount.replace(/\D/g, '')));
+      onSubmit(
+        transaction.id, 
+        name, 
+        parseFloat(amount.replace(/\D/g, '')),
+        transaction.category // Thêm category vào đây
+      );
       onClose();
     }
   };
@@ -215,4 +222,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+
+
 

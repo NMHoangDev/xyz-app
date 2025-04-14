@@ -13,6 +13,7 @@ type Transaction = {
   name: string;
   amount: number;
   date: Date;
+  category?: string;  // Thêm trường category và đánh dấu là optional với ?
 };
 
 export default function IncomeScreen() {
@@ -94,7 +95,7 @@ export default function IncomeScreen() {
                 {/* Bỏ phần hiển thị ngày ở đây */}
               </ThemedView>
               <ThemedText style={styles.transactionAmount}>
-                {transaction.amount.toLocaleString()} đ
+                +{transaction.amount.toLocaleString()} đ
               </ThemedText>
             </TouchableOpacity>
           ))
@@ -107,6 +108,7 @@ export default function IncomeScreen() {
         totalAmount={totalAmount}
         label="thu nhập"
         onAddPress={() => setIsAddModalVisible(true)}
+        type="income"
       />
 
       <AddTransactionModal
@@ -124,7 +126,7 @@ export default function IncomeScreen() {
         }}
         onSubmit={handleEditIncome}
         onDelete={handleDeleteIncome}
-        transaction={selectedTransaction}
+        transaction={selectedTransaction ? {...selectedTransaction, category: selectedTransaction.category || 'other'} : null}
         type="income"
       />
     </ThemedView>
@@ -158,11 +160,11 @@ const styles = StyleSheet.create({
   },
   transactionName: {
     fontSize: 16,
-    // Bỏ marginBottom vì không còn hiển thị ngày
   },
   transactionAmount: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#34C759', // Thêm màu xanh iOS
   },
   placeholderText: {
     textAlign: 'center',
