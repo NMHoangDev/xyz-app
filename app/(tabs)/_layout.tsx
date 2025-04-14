@@ -1,4 +1,4 @@
-import { Tabs, Redirect } from 'expo-router';
+import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
@@ -7,15 +7,6 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Chuyển hướng từ index và explore sang tab income
-export function Index() {
-  return <Redirect href="/(tabs)/income" />;
-}
-
-export function Explore() {
-  return <Redirect href="/(tabs)/income" />;
-}
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -49,6 +40,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="report"
+        options={{
+          title: 'Báo cáo',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="group"
         options={{
           title: 'Nhóm',
@@ -62,9 +60,10 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
         }}
       />
-      {/* Ẩn các tab index và explore */}
+      {/* Chỉ ẩn tab index, không cần tab explore */}
       <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen name="explore" options={{ href: null }} />
+
     </Tabs>
   );
 }
