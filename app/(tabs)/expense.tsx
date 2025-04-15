@@ -7,7 +7,8 @@ import { TotalFooter } from '@/components/footer/TotalFooter';
 import { AddTransactionModal } from '@/components/modals/AddTransactionModal';
 import { EditTransactionModal } from '@/components/modals/EditTransactionModal';
 import { DateSelector } from '@/components/datePickers/DateSelector';
-import { EXPENSE_CATEGORIES } from '@/components/modals/AddTransactionModal';
+import { EXPENSE_CATEGORIES, ExpenseCategoryId } from '@/components/modals/AddTransactionModal';
+import { IconSymbol, IconSymbolName } from '@/components/ui/IconSymbol';
 
 const DEBUG = false; // Set to false to disable logs
 
@@ -24,7 +25,7 @@ export default function ExpenseScreen() {
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<ExpenseCategoryId[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const handleAddExpense = (name: string, amount: number, category: string) => {
@@ -60,30 +61,47 @@ export default function ExpenseScreen() {
     transaction.date.toDateString() === selectedDate.toDateString()
   );
 
-  // Nhóm transactions theo category
-  const groupedTransactions = filteredTransactions.reduce((groups, transaction) => {
-    const category = transaction.category || 'uncategorized';
-    if (!groups[category]) {
-      groups[category] = [];
-    }
-    groups[category].push(transaction);
-    return groups;
-  }, {} as Record<string, Transaction[]>);
+  const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 
-  const getCategoryLabel = (categoryId: string) => {
+  // data tong icome ao
+  const mockTotalIncome = 20000000;
+
+  const groupedTransactions = filteredTransactions.reduce((groups, transaction) => {
+    const category = transaction.category as ExpenseCategoryId;
+    if (!groups[category]) {
+      groups[category] = {
+        transactions: [],
+        total: 0,
+      };
+    }
+    groups[category].transactions.push(transaction);
+    groups[category].total += transaction.amount;
+    return groups;
+  }, {} as Record<ExpenseCategoryId, { transactions: Transaction[], total: number }>);
+
+  const getCategoryLabel = (categoryId: ExpenseCategoryId) => {
     const category = EXPENSE_CATEGORIES.find(cat => cat.id === categoryId);
     return category ? category.label : 'Khác';
   };
 
-  const handleCategoryPress = (categoryId: string) => {
-    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
+  const getCategoryIcon = (categoryId: ExpenseCategoryId): IconSymbolName => {
+    const category = EXPENSE_CATEGORIES.find(cat => cat.id === categoryId);
+    return category?.icon || 'ellipsis.circle';
+  };
+
+  const handleCategoryPress = (categoryId: ExpenseCategoryId) => {
+    setSelectedCategories(prevSelected => {
+      if (prevSelected.includes(categoryId)) {
+        return prevSelected.filter(id => id !== categoryId);
+      } else {
+        return [...prevSelected, categoryId];
+      }
+    });
   };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('vi-VN');
   };
-
-  const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 
   return (
     <ThemedView style={styles.container}>
@@ -98,23 +116,33 @@ export default function ExpenseScreen() {
 
       <ThemedView style={styles.content}>
         {filteredTransactions.length > 0 ? (
-          Object.entries(groupedTransactions).map(([categoryId, categoryTransactions]) => (
+          Object.entries(groupedTransactions).map(([categoryId, { transactions, total }]) => (
             <ThemedView key={categoryId}>
               <TouchableOpacity
                 style={styles.categoryHeader}
-                onPress={() => handleCategoryPress(categoryId)}
+                onPress={() => handleCategoryPress(categoryId as ExpenseCategoryId)}
               >
-                <ThemedText style={styles.categoryName}>
-                  {getCategoryLabel(categoryId)}
-                </ThemedText>
+                <ThemedView style={styles.categoryInfo}>
+                  <ThemedView style={styles.categoryTitleRow}>
+                    <IconSymbol 
+                      name={getCategoryIcon(categoryId as ExpenseCategoryId)} 
+                      size={24} 
+                      color="#FFFFFF" 
+                      style={styles.categoryIcon} 
+                    />
+                    <ThemedText style={styles.categoryName}>
+                      {getCategoryLabel(categoryId as ExpenseCategoryId)}
+                    </ThemedText>
+                  </ThemedView>
+                </ThemedView>
                 <ThemedText style={styles.categoryAmount}>
-                  -{categoryTransactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString()} đ
+                  -{total.toLocaleString()} đ
                 </ThemedText>
               </TouchableOpacity>
 
-              {selectedCategory === categoryId && (
+              {selectedCategories.includes(categoryId as ExpenseCategoryId) && (
                 <ThemedView style={styles.transactionsList}>
-                  {categoryTransactions.map(transaction => (
+                  {transactions.map(transaction => (
                     <TouchableOpacity
                       key={transaction.id}
                       style={styles.transactionItem}
@@ -149,6 +177,8 @@ export default function ExpenseScreen() {
         label="chi tiêu"
         onAddPress={() => setIsAddModalVisible(true)}
         type="expense"
+        totalIncome={mockTotalIncome}
+        totalExpense={totalAmount} 
       />
 
       <AddTransactionModal
@@ -179,25 +209,44 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
   },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 16, 
     marginBottom: 16,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 1, 
   },
   categoryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#161719',
+    backgroundColor: '#1C1C1E',
     borderRadius: 8,
-    marginVertical: 4,
+    marginVertical: 8,
+  },
+  categoryInfo: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  categoryTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 0,
+    backgroundColor: 'transparent',
   },
   categoryName: {
     fontSize: 16,
     fontWeight: '600',
+    marginBottom: 0,
+  },
+  categoryIcon: {
+    marginRight: 8,
+    
+  },
+  categoryRatio: {
+    fontSize: 12,
+    color: '#888888',
   },
   categoryAmount: {
     fontSize: 16,
@@ -206,12 +255,11 @@ const styles = StyleSheet.create({
   },
   transactionsList: {
     paddingLeft: 16,
-    backgroundColor: '#161719',
+    backgroundColor: 'transparent',
   },
   transactionItem: {
     padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee',
+    backgroundColor: 'transparent',
   },
   transactionName: {
     fontSize: 14,

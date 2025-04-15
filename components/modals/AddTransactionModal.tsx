@@ -5,18 +5,19 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import * as Haptics from 'expo-haptics';
 
-// Thêm export vào trước const
 export const EXPENSE_CATEGORIES = [
-  { id: 'food', label: 'Ăn uống' },
-  { id: 'utilities', label: 'Tiện ích (điện, nước, internet)' },
-  { id: 'rent', label: 'Tiền nhà' },
-  { id: 'transport', label: 'Di chuyển' },
-  { id: 'shopping', label: 'Mua sắm' },
-  { id: 'entertainment', label: 'Giải trí' },
-  { id: 'healthcare', label: 'Sức khỏe' },
-  { id: 'education', label: 'Giáo dục' },
-  { id: 'other', label: 'Khác' },
-];
+  { id: 'food', label: 'Ăn uống', icon: 'fork.knife' },
+  { id: 'utilities', label: 'Tiện ích (điện, nước, internet)', icon: 'bolt.fill' },
+  { id: 'rent', label: 'Tiền nhà', icon: 'house.fill' },
+  { id: 'transport', label: 'Di chuyển', icon: 'car.fill' },
+  { id: 'shopping', label: 'Mua sắm', icon: 'bag.fill' },
+  { id: 'entertainment', label: 'Giải trí', icon: 'tv.fill' }, // Sử dụng icon TV mới
+  { id: 'healthcare', label: 'Sức khỏe', icon: 'heart.fill' },
+  { id: 'education', label: 'Giáo dục', icon: 'book.fill' },
+  { id: 'other', label: 'Khác', icon: 'ellipsis.circle' },
+] as const;
+
+export type ExpenseCategoryId = typeof EXPENSE_CATEGORIES[number]['id'];
 
 type AddTransactionModalProps = {
   isVisible: boolean;
@@ -28,7 +29,7 @@ type AddTransactionModalProps = {
 export function AddTransactionModal({ isVisible, onClose, onSubmit, type }: AddTransactionModalProps) {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(EXPENSE_CATEGORIES[0].id);
+  const [selectedCategory, setSelectedCategory] = useState<ExpenseCategoryId>(EXPENSE_CATEGORIES[0].id);
   const [customCategory, setCustomCategory] = useState('');
   const [error, setError] = useState('');
   const [fadeAnim] = useState(new Animated.Value(0));
