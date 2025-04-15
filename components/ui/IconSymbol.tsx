@@ -27,6 +27,21 @@ const MAPPING = {
   'book.fill': 'book',
   'ellipsis.circle': 'more-horiz',
   'fork.knife': 'restaurant',
+  // Thêm các biểu tượng mới
+  'star.fill': 'star',
+  'shopping_cart': 'shopping-cart',
+  'attach_money': 'attach-money',
+  'restaurant': 'restaurant',
+  'work': 'work',
+  'favorite': 'favorite',
+  'star': 'star',
+  'group': 'group',
+  'briefcase.fill': 'work',
+  // Thêm các icon mới cần thiết
+  'airplane.circle.fill': 'flight',
+  'square.and.arrow.up.fill': 'share',
+  'square.and.arrow.up': 'share',
+  'airplane': 'flight',
 } as const;
 
 // Định nghĩa type cho tên các icon
@@ -66,3 +81,6 @@ export function IconSymbol({
 
   return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
 }
+
+// Kiểm tra xem các icon name bạn đang sử dụng có trong MAPPING không
+console.log('Available icons:', Object.keys(MAPPING));

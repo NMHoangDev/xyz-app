@@ -31,7 +31,7 @@ export function TotalFooter({
   // chi tieu / thu nhap
   const getRatioText = () => {
     if (type === 'expense' && totalIncome > 0) {
-      return `Tổng chi tiêu: ${totalExpense.toLocaleString()}/${totalIncome.toLocaleString()} đ`;
+      return `Tổng chi tiêu: ${totalExpense.toLocaleString()}đ`;
     }
     return `Tổng ${label} : ${formattedAmount}`;
   };

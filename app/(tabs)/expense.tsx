@@ -10,7 +10,7 @@ import { DateSelector } from '@/components/datePickers/DateSelector';
 import { EXPENSE_CATEGORIES, ExpenseCategoryId } from '@/components/modals/AddTransactionModal';
 import { IconSymbol, IconSymbolName } from '@/components/ui/IconSymbol';
 
-const DEBUG = false; // Set to false to disable logs
+const DEBUG = false; 
 
 type Transaction = {
   id: string;
