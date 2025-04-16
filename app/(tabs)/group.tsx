@@ -29,6 +29,7 @@ export default function GroupScreen() {
         totalAmount={0}
         label="nhóm"
         onAddPress={() => {}}
+        type="expense"  
       />
     </ThemedView>
   );
@@ -53,4 +54,5 @@ const styles = StyleSheet.create({
     color: '#757575',
   }
 });
+
 
