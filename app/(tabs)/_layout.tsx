@@ -29,49 +29,49 @@ export default function TabLayout() {
       <Tabs.Screen
         name="income"
         options={{
-          title: 'Thu nhập',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="dollarsign.circle.fill" color={color} />,
+          title: "Thu nhập",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="dollarsign.circle.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="expense"
         options={{
-          title: 'Chi tiêu',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
+          title: "Chi tiêu",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <IconSymbol size={28} name="cart.fill" color={color} />
           ),
         }}
       />
+
       <Tabs.Screen
         name="report"
         options={{
-          title: 'Báo cáo',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />,
+          title: "Báo cáo",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="chart.bar.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="group"
         options={{
-          title: 'Nhóm',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.2.fill" color={color} />,
+          title: "Nhóm",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.2.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
-          title: 'Tài khoản',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+          title: "Tài khoản",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.fill" color={color} />
+          ),
         }}
       />
-      <Tabs.Screen name="index" options={{ href: null }} />
-      <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>
   );
 }

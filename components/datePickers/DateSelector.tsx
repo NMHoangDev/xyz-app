@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, Modal, View } from 'react-native';
-import { ThemedText } from '../ThemedText';
-import { ThemedView } from '../ThemedView';
+import React, { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  View,
+} from "react-native";
+import { ThemedText } from "../ThemedText";
+import { ThemedView } from "../ThemedView";
 
 interface DateSelectorProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
 }
 
-export function DateSelector({ selectedDate, onDateSelect }: DateSelectorProps) {
+export function DateSelector({
+  selectedDate,
+  onDateSelect,
+}: DateSelectorProps) {
   const [isMonthPickerVisible, setMonthPickerVisible] = useState(false);
 
   // Tạo mảng 12 tháng của năm hiện tại
@@ -24,7 +33,7 @@ export function DateSelector({ selectedDate, onDateSelect }: DateSelectorProps) 
     const year = date.getFullYear();
     const month = date.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
+
     return Array.from({ length: daysInMonth }, (_, i) => {
       const day = new Date(year, month, i + 1);
       return day;
@@ -32,7 +41,7 @@ export function DateSelector({ selectedDate, onDateSelect }: DateSelectorProps) 
   };
 
   const formatDayOfWeek = (date: Date) => {
-    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    const days = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
     return days[date.getDay()];
   };
 
@@ -57,15 +66,17 @@ export function DateSelector({ selectedDate, onDateSelect }: DateSelectorProps) 
 
   return (
     <ThemedView style={styles.container}>
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => setMonthPickerVisible(true)}
         style={styles.monthSelector}
       >
-        <ThemedText style={styles.monthText}>{formatMonthYear(selectedDate)}</ThemedText>
+        <ThemedText style={styles.monthText}>
+          {formatMonthYear(selectedDate)}
+        </ThemedText>
       </TouchableOpacity>
 
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -75,22 +86,19 @@ export function DateSelector({ selectedDate, onDateSelect }: DateSelectorProps) 
             onPress={() => onDateSelect(date)}
             style={[
               styles.dateItem,
-              isSelected(date) && styles.selectedDateItem
+              isSelected(date) && styles.selectedDateItem,
             ]}
           >
-            <ThemedText 
+            <ThemedText
               style={[
                 styles.dayOfWeekText,
-                isSelected(date) && styles.selectedText
+                isSelected(date) && styles.selectedText,
               ]}
             >
               {formatDayOfWeek(date)}
             </ThemedText>
-            <ThemedText 
-              style={[
-                styles.dateText,
-                isSelected(date) && styles.selectedText
-              ]}
+            <ThemedText
+              style={[styles.dateText, isSelected(date) && styles.selectedText]}
             >
               {formatDate(date)}
             </ThemedText>
@@ -104,7 +112,7 @@ export function DateSelector({ selectedDate, onDateSelect }: DateSelectorProps) 
         animationType="fade"
         onRequestClose={() => setMonthPickerVisible(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setMonthPickerVisible(false)}
@@ -117,16 +125,16 @@ export function DateSelector({ selectedDate, onDateSelect }: DateSelectorProps) 
                   key={date.getMonth()}
                   style={[
                     styles.monthItem,
-                    date.getMonth() === selectedDate.getMonth() && 
-                    styles.selectedMonthItem
+                    date.getMonth() === selectedDate.getMonth() &&
+                      styles.selectedMonthItem,
                   ]}
                   onPress={() => handleMonthSelect(date)}
                 >
-                  <ThemedText 
+                  <ThemedText
                     style={[
                       styles.monthItemText,
-                      date.getMonth() === selectedDate.getMonth() && 
-                      styles.selectedMonthText
+                      date.getMonth() === selectedDate.getMonth() &&
+                        styles.selectedMonthText,
                     ]}
                   >
                     {`Tháng ${date.getMonth() + 1}`}
@@ -144,6 +152,7 @@ export function DateSelector({ selectedDate, onDateSelect }: DateSelectorProps) 
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 1,
+    backgroundColor: "#0F0F10", // nền chung dark
   },
   monthSelector: {
     paddingHorizontal: 16,
@@ -151,79 +160,91 @@ const styles = StyleSheet.create({
   },
   monthText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "700",
     marginBottom: 12,
+    color: "#FFFFFF",
   },
   scrollContent: {
     paddingHorizontal: 8,
   },
   dateItem: {
-    width: 45,
-    height: 65,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 4,
-    backgroundColor: '#161719',
+    width: 52,
+    height: 70,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 6,
+    backgroundColor: "#1E1F22",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   selectedDateItem: {
-    backgroundColor: '#4CB050',
+    backgroundColor: "#4BAF50", // xanh nổi bật hơn
   },
   dayOfWeekText: {
-    fontSize: 12,
+    fontSize: 13,
     marginBottom: 4,
-    color: '#666',
+    fontWeight: "500",
+    color: "#B0B0B0",
   },
   dateText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#F3F3F3",
   },
   selectedText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   monthPickerContainer: {
-    width: '90%',
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: '#161719',
+    width: "90%",
+    padding: 20,
+    borderRadius: 20,
+    backgroundColor: "#1B1B1E",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
   },
   monthPickerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: "700",
     marginBottom: 16,
-    textAlign: 'center',
+    color: "#FFFFFF",
+    textAlign: "center",
   },
   monthGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     paddingHorizontal: 8,
   },
   monthItem: {
-    width: '30%',
-    padding: 12,
-    marginBottom: 12,
-    borderRadius: 12,
-    backgroundColor: '#000000',
-    alignItems: 'center',
+    width: "30%",
+    paddingVertical: 14,
+    marginBottom: 14,
+    borderRadius: 14,
+    backgroundColor: "#2A2B2F",
+    alignItems: "center",
   },
   selectedMonthItem: {
-    backgroundColor: '#4CB050',
+    backgroundColor: "#4CB050",
   },
   monthItemText: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#DDDDDD",
   },
   selectedMonthText: {
-    color: '#FFFFFF',
-  }
+    color: "#FFFFFF",
+  },
 });
-
-
-

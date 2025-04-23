@@ -1,23 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, StyleSheet, TextInput, TouchableOpacity, View, Animated, KeyboardAvoidingView, Platform } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useState, useEffect } from "react";
+import {
+  Modal,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Animated,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 type Transaction = {
-  id: string;
+  id: number;
   name: string;
-  amount: number;
+  amount: string;
   date: Date;
-  category: string;  // Thêm trường category
+  category: string | null; // Thêm trường category
+  description?: string | null; // Thêm trường category
+  // Thêm trường category
 };
 
 interface EditTransactionModalProps {
   isVisible: boolean;
   onClose: () => void;
-  onSubmit: (id: string, name: string, amount: number, category: string) => void;
-  onDelete: (id: string) => void;
+  onSubmit: (
+    id: number,
+    name: string,
+    amount: string,
+    category: string | null,
+    description?: string | null
+  ) => void;
+  onDelete: (id: number) => void;
   transaction: Transaction | null;
-  type: 'income' | 'expense';
+  type: "income" | "expense";
 }
 
 export function EditTransactionModal({
@@ -26,16 +43,18 @@ export function EditTransactionModal({
   onSubmit,
   onDelete,
   transaction,
-  type
+  type,
 }: EditTransactionModalProps) {
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
+  const [name, setName] = useState<string | null>("");
+  const [description, setDescription] = useState<string | null>("");
+  const [amount, setAmount] = useState("");
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(400)).current;
 
   useEffect(() => {
     if (transaction) {
       setName(transaction.name);
+      setDescription(transaction.description);
       setAmount(transaction.amount.toString());
     }
   }, [transaction]);
@@ -73,9 +92,19 @@ export function EditTransactionModal({
   const handleSubmit = () => {
     if (transaction && name && amount) {
       onSubmit(
-        transaction.id, 
-        name, 
-        parseFloat(amount.replace(/\D/g, '')),
+        transaction.id,
+        name,
+        amount,
+        transaction.category // Thêm category vào đây
+      );
+      onClose();
+    }
+    if (transaction && description && amount) {
+      console.log(transaction);
+      onSubmit(
+        transaction.id,
+        description,
+        amount,
         transaction.category // Thêm category vào đây
       );
       onClose();
@@ -96,25 +125,28 @@ export function EditTransactionModal({
       animationType="none"
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
-          <Animated.View 
-            style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}
+          <Animated.View
+            style={[
+              styles.modalContent,
+              { transform: [{ translateY: slideAnim }] },
+            ]}
           >
             <ThemedText style={styles.title}>
-              {`Sửa khoản ${type === 'income' ? 'thu nhập' : 'chi tiêu'}`}
+              {`Sửa khoản ${type === "income" ? "thu nhập" : "chi tiêu"}`}
             </ThemedText>
-            
+
             <View style={styles.inputContainer}>
               <ThemedText style={styles.label}>Tên giao dịch</ThemedText>
               <TextInput
                 style={styles.input}
                 placeholder="Nhập tên giao dịch"
-                value={name}
-                onChangeText={setName}
+                value={`${type === "income" ? name : description}`}
+                onChangeText={type === "income" ? setName : setDescription}
                 placeholderTextColor="#666"
               />
             </View>
@@ -132,22 +164,22 @@ export function EditTransactionModal({
             </View>
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity 
-                style={[styles.button, styles.deleteButton]} 
+              <TouchableOpacity
+                style={[styles.button, styles.deleteButton]}
                 onPress={handleDelete}
               >
                 <ThemedText style={styles.buttonText}>Xóa</ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={[styles.button, styles.cancelButton]} 
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
                 onPress={onClose}
               >
                 <ThemedText style={styles.buttonText}>Hủy</ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={[styles.button, styles.submitButton]} 
+              <TouchableOpacity
+                style={[styles.button, styles.submitButton]}
                 onPress={handleSubmit}
               >
                 <ThemedText style={styles.buttonText}>Cập nhật</ThemedText>
@@ -166,11 +198,11 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: "#1C1C1E",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -178,9 +210,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   inputContainer: {
     gap: 8,
@@ -190,39 +222,35 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    backgroundColor: '#2C2C2E',
+    backgroundColor: "#2C2C2E",
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: 10,
   },
   button: {
     flex: 1,
     padding: 15,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   deleteButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: "#FF3B30",
   },
   cancelButton: {
-    backgroundColor: '#636366',
+    backgroundColor: "#636366",
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
-
-
-
-
