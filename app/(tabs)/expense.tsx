@@ -1,89 +1,213 @@
-import React, { useState } from 'react';
-import { StyleSheet, Platform, TouchableOpacity } from 'react-native';
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { TotalFooter } from '@/components/footer/TotalFooter';
-import { AddTransactionModal } from '@/components/modals/AddTransactionModal';
-import { EditTransactionModal } from '@/components/modals/EditTransactionModal';
-import { DateSelector } from '@/components/datePickers/DateSelector';
-import { EXPENSE_CATEGORIES } from '@/components/modals/AddTransactionModal';
-
-const DEBUG = false; // Set to false to disable logs
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Platform,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons"; // Expo vector icons
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { TotalFooter } from "@/components/footer/TotalFooter";
+import { AddTransactionModal } from "@/components/modals/AddTransactionModal";
+import { EditTransactionModal } from "@/components/modals/EditTransactionModal";
+import { DateSelector } from "@/components/datePickers/DateSelector";
+import { API_URL } from "@env";
 
 type Transaction = {
-  id: string;
+  id: number;
   name: string;
-  amount: number;
+  amount: string;
   date: Date;
+  category: string | null;
+};
+
+type ExpenseCategoryData = {
   category: string;
+  totalAmount: number;
+  expenses: Array<{ description: string; amount: number; id: number }>;
 };
 
 export default function ExpenseScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [expense, setExpense] = useState([]);
 
-  const handleAddExpense = (name: string, amount: number, category: string) => {
-    const newTransaction: Transaction = {
-      id: Date.now().toString(),
-      name,
-      amount,
-      date: selectedDate,
-      category,
-    };
-    setTransactions([newTransaction, ...transactions]);
+  const fetchExpenses = async (userId, month, year, day) => {
+    try {
+      const url = `${API_URL}/api/expense/get-all?userId=${userId}&month=${month}&year=${year}${
+        day ? `&day=${day}` : ""
+      }`;
+      const response = await fetch(url);
+      const contentType = response.headers.get("Content-Type");
+
+      if (response.ok) {
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          setExpense(data.data);
+          return data;
+        } else {
+          const text = await response.text();
+          console.error("Dữ liệu trả về không phải JSON:", text);
+          throw new Error("Dữ liệu trả về không phải JSON.");
+        }
+      } else {
+        const errorText = await response.text();
+        console.error("Lỗi khi gọi API:", errorText);
+        throw new Error(`Lỗi khi gọi API: ${response.statusText}`);
+      }
+    } catch (err) {
+      console.error("Error:", err.message);
+      throw err;
+    }
   };
 
-  const handleEditExpense = (id: string, name: string, amount: number, category: string) => {
-    setTransactions(transactions.map(transaction => 
-      transaction.id === id 
-        ? { ...transaction, name, amount, category }
-        : transaction
-    ));
+  useEffect(() => {
+    const day = selectedDate.getDate();
+    const month = selectedDate.getMonth() + 1;
+    const year = selectedDate.getFullYear();
+    fetchExpenses(1, month, year, day);
+  }, [selectedDate]);
+
+  const handleAddExpense = async (
+    name: string,
+    amount: number,
+    category: string | null,
+    userId: number
+  ) => {
+    try {
+      const day = selectedDate.getDate();
+      const month = selectedDate.getMonth() + 1;
+      const year = selectedDate.getFullYear();
+
+      const response = await fetch(`${API_URL}/api/expense/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          amount: amount.toString(),
+          userId,
+          type_expense_name: category,
+          day,
+          month,
+          year,
+        }),
+      });
+
+      const result = await response.json();
+      if (response.status === 200) {
+        Alert.alert("Tạo chi tiêu thành công");
+        fetchExpenses(1, month, year, day);
+      } else {
+        console.error("Error creating expense:", result.error);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
-  const handleDeleteExpense = (id: string) => {
-    setTransactions(transactions.filter(transaction => transaction.id !== id));
+  const handleEditExpense = async (
+    id: number,
+    name: string,
+    amount: string,
+    category: string | null
+  ) => {
+    try {
+      const day = selectedDate.getDate();
+      const month = selectedDate.getMonth() + 1;
+      const year = selectedDate.getFullYear();
+      const response = await fetch(`${API_URL}/api/expense/update/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          amount: amount.toString(),
+          userId: 1,
+          day,
+          month,
+          year,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        Alert.alert("Lỗi", data.error || "Cập nhật thất bại");
+      } else {
+        Alert.alert("Thành công", "Chi tiêu đã được cập nhật!");
+        fetchExpenses(1, month, year, day);
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể kết nối đến máy chủ");
+      console.error(error);
+    }
   };
 
-  const handleTransactionPress = (transaction: Transaction) => {
+  const handleDeleteExpense = async (id: number) => {
+    const day = selectedDate.getDate();
+    const month = selectedDate.getMonth() + 1;
+    const year = selectedDate.getFullYear();
+    try {
+      const response = await fetch(`${API_URL}/api/expense/delete/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        Alert.alert("Lỗi", data.error || "Không thể xóa chi tiêu");
+      } else {
+        Alert.alert("Thành công", "Đã xóa chi tiêu thành công!");
+        fetchExpenses(1, month, year, day);
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa:", error);
+      Alert.alert("Lỗi", "Không thể kết nối đến máy chủ");
+    }
+  };
+
+  const handleTransactionPress = async (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setIsEditModalVisible(true);
   };
 
-  // Lọc transactions theo ngày được chọn
-  const filteredTransactions = transactions.filter(transaction => 
-    transaction.date.toDateString() === selectedDate.toDateString()
-  );
-
-  // Nhóm transactions theo category
-  const groupedTransactions = filteredTransactions.reduce((groups, transaction) => {
-    const category = transaction.category || 'uncategorized';
+  const groupedTransactions = expense.reduce<
+    Record<string, ExpenseCategoryData>
+  >((groups, categoryData, index) => {
+    const category = categoryData.category || "Khác";
     if (!groups[category]) {
-      groups[category] = [];
+      groups[category] = {
+        id: `${category}-${index}`,
+        category,
+        totalAmount: 0,
+        expenses: [],
+      };
     }
-    groups[category].push(transaction);
+
+    groups[category].totalAmount += categoryData.totalAmount;
+    categoryData.expenses.forEach((expense) => {
+      groups[category].expenses.push({
+        description: expense.description,
+        amount: expense.amount,
+        id: expense.id,
+      });
+    });
+
     return groups;
-  }, {} as Record<string, Transaction[]>);
+  }, {});
 
-  const getCategoryLabel = (categoryId: string) => {
-    const category = EXPENSE_CATEGORIES.find(cat => cat.id === categoryId);
-    return category ? category.label : 'Khác';
-  };
-
-  const handleCategoryPress = (categoryId: string) => {
-    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('vi-VN');
-  };
-
-  const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  const totalAmount = Object.values(groupedTransactions).reduce(
+    (sum, category) => sum + category.totalAmount,
+    0
+  );
 
   return (
     <ThemedView style={styles.container}>
@@ -91,58 +215,71 @@ export default function ExpenseScreen() {
         <ThemedText type="title">Chi tiêu</ThemedText>
       </ThemedView>
 
-      <DateSelector 
+      <DateSelector
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate}
       />
 
-      <ThemedView style={styles.content}>
-        {filteredTransactions.length > 0 ? (
-          Object.entries(groupedTransactions).map(([categoryId, categoryTransactions]) => (
-            <ThemedView key={categoryId}>
-              <TouchableOpacity
-                style={styles.categoryHeader}
-                onPress={() => handleCategoryPress(categoryId)}
-              >
-                <ThemedText style={styles.categoryName}>
-                  {getCategoryLabel(categoryId)}
-                </ThemedText>
-                <ThemedText style={styles.categoryAmount}>
-                  -{categoryTransactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString()} đ
-                </ThemedText>
-              </TouchableOpacity>
-
-              {selectedCategory === categoryId && (
-                <ThemedView style={styles.transactionsList}>
-                  {categoryTransactions.map(transaction => (
-                    <TouchableOpacity
-                      key={transaction.id}
-                      style={styles.transactionItem}
-                      onPress={() => handleTransactionPress(transaction)}
-                    >
-                      <ThemedText style={styles.transactionName}>
-                        {transaction.name}
-                      </ThemedText>
-                      <ThemedView style={styles.transactionDetails}>
-                        <ThemedText style={styles.transactionDate}>
-                          {formatDate(transaction.date)}
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        {expense.length > 0 ? (
+          Object.entries(groupedTransactions).map(
+            ([categoryId, categoryData]) => (
+              <ThemedView key={categoryId} style={styles.categoryCard}>
+                <TouchableOpacity
+                  style={styles.categoryHeader}
+                  onPress={() =>
+                    setSelectedCategory(
+                      selectedCategory === categoryId ? null : categoryId
+                    )
+                  }
+                >
+                  <Ionicons name="wallet-outline" size={24} color="#4BA3FA" />{" "}
+                  {/* Icon for category */}
+                  <ThemedText style={styles.categoryName}>
+                    {categoryData.category}
+                  </ThemedText>
+                  <ThemedText style={styles.categoryAmount}>
+                    - {categoryData.totalAmount.toLocaleString()} đ
+                  </ThemedText>
+                </TouchableOpacity>
+                {selectedCategory === categoryId && (
+                  <ThemedView style={styles.transactionsList}>
+                    {categoryData.expenses.map((transaction) => (
+                      <TouchableOpacity
+                        key={transaction.id}
+                        style={styles.transactionItem}
+                        onPress={() => handleTransactionPress(transaction)}
+                      >
+                        <Ionicons
+                          name="cash-outline"
+                          size={20}
+                          color="#4CD964"
+                        />{" "}
+                        {/* Icon for transaction */}
+                        <ThemedText style={styles.transactionName}>
+                          {transaction.description}
                         </ThemedText>
-                        <ThemedText style={styles.transactionAmount}>
-                          -{transaction.amount.toLocaleString()} đ
-                        </ThemedText>
-                      </ThemedView>
-                    </TouchableOpacity>
-                  ))}
-                </ThemedView>
-              )}
-            </ThemedView>
-          ))
+                        <ThemedView style={styles.transactionDetails}>
+                          <ThemedText style={styles.transactionAmount}>
+                            - {transaction.amount.toLocaleString()} đ
+                          </ThemedText>
+                        </ThemedView>
+                      </TouchableOpacity>
+                    ))}
+                  </ThemedView>
+                )}
+              </ThemedView>
+            )
+          )
         ) : (
           <ThemedText style={styles.placeholderText}>
             Chưa có khoản chi tiêu nào
           </ThemedText>
         )}
-      </ThemedView>
+      </ScrollView>
 
       <TotalFooter
         totalAmount={totalAmount}
@@ -156,6 +293,7 @@ export default function ExpenseScreen() {
         onClose={() => setIsAddModalVisible(false)}
         onSubmit={handleAddExpense}
         type="expense"
+        userId={1}
       />
 
       <EditTransactionModal
@@ -176,63 +314,80 @@ export default function ExpenseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    backgroundColor: "#0F0F10", // nền đen xám sang
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
   },
   header: {
     paddingHorizontal: 16,
+    paddingVertical: 16,
     marginBottom: 16,
   },
   content: {
     flex: 1,
     paddingHorizontal: 16,
   },
-  categoryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  scrollContainer: {
+    paddingHorizontal: 16,
+  },
+  categoryCard: {
+    margin: 20,
     padding: 16,
-    backgroundColor: '#161719',
-    borderRadius: 8,
-    marginVertical: 4,
+    borderRadius: 16,
+    backgroundColor: "#1C1C1E",
+    width: "90%",
+  },
+  categoryHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
   categoryName: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
   categoryAmount: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#e74c3c',
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#FF6B6B",
   },
   transactionsList: {
-    paddingLeft: 16,
-    backgroundColor: '#161719',
+    paddingLeft: 12,
+    marginTop: 12,
   },
   transactionItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee',
+    marginBottom: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#2C2C2E",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   transactionName: {
-    fontSize: 14,
-    marginBottom: 4,
+    fontSize: 16,
+    color: "#F9F9F9",
+    marginBottom: 8,
   },
   transactionDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  transactionDate: {
-    fontSize: 12,
-    color: '#888888',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   transactionAmount: {
-    fontSize: 14,
-    color: '#e74c3c',
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#FF6B6B",
   },
   placeholderText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 20,
-    color: '#666666',
+    color: "#999999",
+    fontSize: 14,
+    fontStyle: "italic",
   },
 });

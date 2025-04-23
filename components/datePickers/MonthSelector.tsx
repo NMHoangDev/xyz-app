@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, Modal, View } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useState } from "react";
+import { StyleSheet, TouchableOpacity, Modal, View } from "react-native";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 type MonthSelectorProps = {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
 };
 
-export function MonthSelector({ selectedDate, onDateSelect }: MonthSelectorProps) {
+export function MonthSelector({
+  selectedDate,
+  onDateSelect,
+}: MonthSelectorProps) {
   const [isMonthPickerVisible, setMonthPickerVisible] = useState(false);
 
   const getMonthsInYear = (year: number) => {
@@ -29,11 +32,13 @@ export function MonthSelector({ selectedDate, onDateSelect }: MonthSelectorProps
 
   return (
     <ThemedView style={styles.container}>
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => setMonthPickerVisible(true)}
         style={styles.monthSelector}
       >
-        <ThemedText style={styles.monthText}>{formatMonthYear(selectedDate)}</ThemedText>
+        <ThemedText style={styles.monthText}>
+          {formatMonthYear(selectedDate)}
+        </ThemedText>
       </TouchableOpacity>
 
       <Modal
@@ -42,7 +47,7 @@ export function MonthSelector({ selectedDate, onDateSelect }: MonthSelectorProps
         animationType="fade"
         onRequestClose={() => setMonthPickerVisible(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setMonthPickerVisible(false)}
@@ -55,16 +60,16 @@ export function MonthSelector({ selectedDate, onDateSelect }: MonthSelectorProps
                   key={date.getMonth()}
                   style={[
                     styles.monthItem,
-                    date.getMonth() === selectedDate.getMonth() && 
-                    styles.selectedMonthItem
+                    date.getMonth() === selectedDate.getMonth() &&
+                      styles.selectedMonthItem,
                   ]}
                   onPress={() => handleMonthSelect(date)}
                 >
-                  <ThemedText 
+                  <ThemedText
                     style={[
                       styles.monthItemText,
-                      date.getMonth() === selectedDate.getMonth() && 
-                      styles.selectedMonthText
+                      date.getMonth() === selectedDate.getMonth() &&
+                        styles.selectedMonthText,
                     ]}
                   >
                     {`Tháng ${date.getMonth() + 1}`}
@@ -82,6 +87,7 @@ export function MonthSelector({ selectedDate, onDateSelect }: MonthSelectorProps
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 1,
+    backgroundColor: "#0F0F10", // đồng bộ dark mode
   },
   monthSelector: {
     paddingHorizontal: 16,
@@ -89,49 +95,63 @@ const styles = StyleSheet.create({
   },
   monthText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "700",
     marginBottom: 12,
+    color: "#FFFFFF",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   monthPickerContainer: {
-    width: '90%',
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: '#161719',
+    width: "90%",
+    padding: 20,
+    borderRadius: 20,
+    backgroundColor: "#1B1B1E",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
   },
   monthPickerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: "700",
     marginBottom: 16,
-    textAlign: 'center',
+    color: "#FFFFFF",
+    textAlign: "center",
   },
   monthGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     paddingHorizontal: 8,
   },
   monthItem: {
-    width: '30%',
-    padding: 12,
-    marginBottom: 12,
-    borderRadius: 12,
-    backgroundColor: '#000000',
-    alignItems: 'center',
+    width: "30%",
+    paddingVertical: 14,
+    marginBottom: 14,
+    borderRadius: 14,
+    backgroundColor: "#2A2B2F",
+    alignItems: "center",
   },
   selectedMonthItem: {
-    backgroundColor: '#4CB050',
+    backgroundColor: "#4CB050",
+    shadowColor: "#4CB050",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   monthItemText: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#DDDDDD",
   },
   selectedMonthText: {
-    color: '#FFFFFF',
-  }
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
 });

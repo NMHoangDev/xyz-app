@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { StyleSheet, Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState } from "react";
+import { StyleSheet, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { TabSwitcher } from '@/components/navigation/TabSwitcher';
-import { TotalFooter } from '@/components/footer/TotalFooter';
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { TabSwitcher } from "@/components/navigation/TabSwitcher";
+import { TotalFooter } from "@/components/footer/TotalFooter";
 
 export default function GroupScreen() {
-  const [activeTab, setActiveTab] = useState('current');
+  const [activeTab, setActiveTab] = useState("current");
 
   return (
     <ThemedView style={styles.container}>
@@ -25,11 +25,7 @@ export default function GroupScreen() {
         <ThemedText style={styles.placeholderText}>Chưa có nhóm nào</ThemedText>
       </ThemedView>
 
-      <TotalFooter
-        totalAmount={0}
-        label="nhóm"
-        onAddPress={() => {}}
-      />
+      <TotalFooter totalAmount={0} label="nhóm" onAddPress={() => {}} />
     </ThemedView>
   );
 }
@@ -37,7 +33,7 @@ export default function GroupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
   },
   header: {
     paddingHorizontal: 16,
@@ -48,9 +44,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   placeholderText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 20,
-    color: '#757575',
-  }
+    color: "#757575",
+  },
 });
-
