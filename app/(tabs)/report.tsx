@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 8,
+    backgroundColor: 'transparent', // Để trong suốt
   },
   summaryLabel: {
     fontSize: 16,
@@ -252,6 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1C1C1E",
   },
   incomeText: {
+
     color: "#34C759",
     fontWeight: "600",
     fontSize: 16,
@@ -259,6 +261,7 @@ const styles = StyleSheet.create({
   expenseText: {
     color: "#e74c3c",
     fontWeight: "600",
+
     fontSize: 16,
   },
   emptyText: {
@@ -278,5 +281,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
 export default ReportScreen;
+

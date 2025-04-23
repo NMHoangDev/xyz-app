@@ -14,7 +14,6 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import * as Haptics from "expo-haptics";
 
-// Thêm export vào trước const
 export const EXPENSE_CATEGORIES = [
   { id: "Ăn uống", label: "Ăn uống" },
   {
@@ -29,7 +28,6 @@ export const EXPENSE_CATEGORIES = [
   { id: "Giáo dục", label: "Giáo dục" },
   { id: "Khác", label: "Khác" },
 ];
-
 type AddTransactionModalProps = {
   isVisible: boolean;
   onClose: () => void;
@@ -42,6 +40,7 @@ type AddTransactionModalProps = {
   type: "expense" | "income";
   userId: number;
 };
+
 
 export function AddTransactionModal({
   isVisible,
@@ -57,6 +56,7 @@ export function AddTransactionModal({
   );
   const [customCategory, setCustomCategory] = useState("");
   const [error, setError] = useState("");
+
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(100));
 

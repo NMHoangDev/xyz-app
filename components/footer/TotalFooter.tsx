@@ -13,6 +13,7 @@ type TotalFooterProps = {
   type: "income" | "expense";
   totalIncome?: number; // Thêm prop cho tổng thu nhập
   totalExpense?: number; // Thêm prop cho tổng chi tiêu
+
 };
 
 export function TotalFooter({
@@ -26,9 +27,11 @@ export function TotalFooter({
   const insets = useSafeAreaInsets();
 
   // Format số tiền với đơn vị đồng
+
   const formattedAmount = totalAmount.toLocaleString() + " đ";
 
   // Tạo text hiển thị tỷ lệ
+
   const getRatioText = () => {
     if (type === "expense" && totalIncome > 0) {
       return `Tổng chi tiêu: ${totalExpense.toLocaleString()}/${totalIncome.toLocaleString()} đ`;
@@ -66,6 +69,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   container: {
+
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -77,6 +81,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#FFFFFF",
+
   },
   addButton: {
     width: 44,

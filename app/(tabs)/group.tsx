@@ -25,7 +25,9 @@ export default function GroupScreen() {
         <ThemedText style={styles.placeholderText}>Chưa có nhóm nào</ThemedText>
       </ThemedView>
 
+
       <TotalFooter totalAmount={0} label="nhóm" onAddPress={() => {}} />
+
     </ThemedView>
   );
 }
@@ -49,3 +51,4 @@ const styles = StyleSheet.create({
     color: "#757575",
   },
 });
+

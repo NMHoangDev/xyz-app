@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -14,6 +15,7 @@ import { AddTransactionModal } from "@/components/modals/AddTransactionModal";
 import { EditTransactionModal } from "@/components/modals/EditTransactionModal";
 import { DateSelector } from "@/components/datePickers/DateSelector";
 import { API_URL } from "@env";
+
 
 type Transaction = {
   id: number;
@@ -33,9 +35,11 @@ export default function ExpenseScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [expense, setExpense] = useState([]);
 
@@ -179,6 +183,7 @@ export default function ExpenseScreen() {
     setIsEditModalVisible(true);
   };
 
+
   const groupedTransactions = expense.reduce<
     Record<string, ExpenseCategoryData>
   >((groups, categoryData, index) => {
@@ -201,13 +206,16 @@ export default function ExpenseScreen() {
       });
     });
 
+
     return groups;
   }, {});
+
 
   const totalAmount = Object.values(groupedTransactions).reduce(
     (sum, category) => sum + category.totalAmount,
     0
   );
+
 
   return (
     <ThemedView style={styles.container}>
@@ -219,6 +227,7 @@ export default function ExpenseScreen() {
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate}
       />
+
 
       <ScrollView
         style={styles.content}
@@ -261,6 +270,7 @@ export default function ExpenseScreen() {
                         {/* Icon for transaction */}
                         <ThemedText style={styles.transactionName}>
                           {transaction.description}
+      
                         </ThemedText>
                         <ThemedView style={styles.transactionDetails}>
                           <ThemedText style={styles.transactionAmount}>
@@ -286,6 +296,8 @@ export default function ExpenseScreen() {
         label="chi tiêu"
         onAddPress={() => setIsAddModalVisible(true)}
         type="expense"
+        totalIncome={mockTotalIncome}
+        totalExpense={totalAmount} 
       />
 
       <AddTransactionModal
@@ -318,13 +330,15 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? 60 : 40,
   },
   header: {
+
     paddingHorizontal: 16,
     paddingVertical: 16,
+
     marginBottom: 16,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 1, 
   },
   scrollContainer: {
     paddingHorizontal: 16,
@@ -332,6 +346,7 @@ const styles = StyleSheet.create({
   categoryCard: {
     margin: 20,
     padding: 16,
+
     borderRadius: 16,
     backgroundColor: "#1C1C1E",
     width: "90%",
@@ -346,6 +361,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "700",
     color: "#FFFFFF",
+
   },
   categoryAmount: {
     fontSize: 17,
@@ -353,6 +369,7 @@ const styles = StyleSheet.create({
     color: "#FF6B6B",
   },
   transactionsList: {
+
     paddingLeft: 12,
     marginTop: 12,
   },
@@ -367,6 +384,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
+
   },
   transactionName: {
     fontSize: 16,

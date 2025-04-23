@@ -7,8 +7,7 @@ import { OpaqueColorValue, StyleProp, TextStyle } from 'react-native';
 
 // Add your SFSymbol to MaterialIcons mappings here.
 const MAPPING = {
-  // See MaterialIcons here: https://icons.expo.fyi
-  // See SF Symbols in the SF Symbols app on Mac.
+  'tv.fill': 'live-tv',
   'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
@@ -19,7 +18,15 @@ const MAPPING = {
   'chart.bar.fill': 'bar-chart',
   'person.2.fill': 'group',
   'person.fill': 'person',
-  'plus': 'add',  // Thêm mapping cho icon plus
+  'plus': 'add',
+  'bolt.fill': 'flash-on',
+  'car.fill': 'directions-car',
+  'bag.fill': 'shopping-bag',
+  'movie.fill': 'theaters',
+  'heart.fill': 'favorite',
+  'book.fill': 'book',
+  'ellipsis.circle': 'more-horiz',
+  'fork.knife': 'restaurant',
 } as const;
 
 // Định nghĩa type cho tên các icon
@@ -42,5 +49,20 @@ export function IconSymbol({
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
+  // Thêm detailed logging
+  console.log('IconSymbol Debug:', {
+    inputName: name,
+    mappedName: MAPPING[name],
+    availableIcons: Object.keys(MAPPING),
+    color,
+    size
+  });
+
+  // Kiểm tra xem name có trong MAPPING không
+  if (!MAPPING[name]) {
+    console.warn(`Icon mapping not found for: ${name}`);
+    return null;
+  }
+
   return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
 }
